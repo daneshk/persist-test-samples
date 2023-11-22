@@ -1,6 +1,6 @@
 [package]
 org = "danesh"
-name = "mock_with_inmemoey"
+name = "mock_with_inmemory"
 version = "0.1.0"
 distribution = "2201.8.2"
 
