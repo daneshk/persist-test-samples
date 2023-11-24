@@ -1,0 +1,10 @@
+### Create a doctor
+POST http://localhost:9090/hospital/doctors
+Content-Type: application/json
+
+{
+    "id": 6,
+    "name": "Dr. House",
+    "specialty": "Neurologist",
+    "phoneNumber": "1234567890"
+}
