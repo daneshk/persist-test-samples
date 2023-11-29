@@ -3,6 +3,6 @@
 // It should not be modified by hand.
 
 configurable string url = ?;
-configurable string user = ?;
-configurable string password = "";
+configurable string username = ?;
+configurable string pwd = "";
 

@@ -3,10 +3,10 @@
 // It should not be modified by hand.
 import ballerinax/mysql;
 
-configurable int port1 = ?;
-configurable string hostname = ?;
-configurable string username = ?;
-configurable string db = ?;
-configurable string pwd = ?;
+configurable int port = ?;
+configurable string host = ?;
+configurable string user = ?;
+configurable string database = ?;
+configurable string password = ?;
 configurable mysql:Options & readonly connectionOptions = {};
 
