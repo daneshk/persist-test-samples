@@ -1,0 +1,7 @@
+[mock_with_h2.db]
+hostname = "localhost"
+port1 = 3307
+username = "dbuser"
+pwd = "dbpwd123"
+db = "hospitaldb"
+
