@@ -4,17 +4,16 @@
 import ballerina/jballerina.java;
 import ballerina/persist;
 import ballerina/sql;
-import ballerinax/java.jdbc;
-import ballerinax/h2.driver as _;
+import ballerinax/mysql;
+import ballerinax/mysql.driver as _;
 import ballerinax/persist.sql as psql;
-import mock_with_h2.db;
 
 const DOCTOR = "doctors";
 
 public isolated client class Client {
     *persist:AbstractPersistClient;
 
-    private final jdbc:Client dbClient;
+    private final mysql:Client dbClient;
 
     private final map<psql:SQLClient> persistClients;
 
@@ -32,9 +31,9 @@ public isolated client class Client {
         }
     };
 
-    public isolated function init(string url, string? user = (), string? password = (),
-            jdbc:Options? options = ()) returns persist:Error? {
-        jdbc:Client|error dbClient = new (url = url, user = user, password = password, options = {});
+    public isolated function init(string host = hostname, string? user = username, string? password = pwd, string? database = db,
+        int port = port1, mysql:Options? options = (), sql:ConnectionPool? connectionPool = ()) returns persist:Error? {
+        mysql:Client|error dbClient = new (host = host, user = user, password = password, database = database, port = port, options = connectionOptions);
         if dbClient is error {
             return <persist:Error>error(dbClient.message());
         }
@@ -42,27 +41,27 @@ public isolated client class Client {
         self.persistClients = {[DOCTOR] : check new (dbClient, self.metadata.get(DOCTOR), psql:MYSQL_SPECIFICS)};
     }
 
-    isolated resource function get doctors(db:DoctorTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
+    isolated resource function get doctors(DoctorTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
         'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
         name: "query"
     } external;
 
-    isolated resource function get doctors/[int id](db:DoctorTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
+    isolated resource function get doctors/[int id](DoctorTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
         'class: "io.ballerina.stdlib.persist.sql.datastore.MySQLProcessor",
         name: "queryOne"
     } external;
 
-    isolated resource function post doctors(db:DoctorInsert[] data) returns int[]|persist:Error {
+    isolated resource function post doctors(DoctorInsert[] data) returns int[]|persist:Error {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(DOCTOR);
         }
         _ = check sqlClient.runBatchInsertQuery(data);
-        return from db:DoctorInsert inserted in data
+        return from DoctorInsert inserted in data
             select inserted.id;
     }
 
-    isolated resource function put doctors/[int id](db:DoctorUpdate value) returns db:Doctor|persist:Error {
+    isolated resource function put doctors/[int id](DoctorUpdate value) returns Doctor|persist:Error {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(DOCTOR);
@@ -71,8 +70,8 @@ public isolated client class Client {
         return self->/doctors/[id].get();
     }
 
-    isolated resource function delete doctors/[int id]() returns db:Doctor|persist:Error {
-        db:Doctor result = check self->/doctors/[id].get();
+    isolated resource function delete doctors/[int id]() returns Doctor|persist:Error {
+        Doctor result = check self->/doctors/[id].get();
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(DOCTOR);
